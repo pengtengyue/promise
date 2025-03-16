@@ -1,0 +1,17 @@
+{
+  "name": "promise",
+  "version": "1.0.0",
+  "description": "A simple hand-written Promise implementation with Jest tests",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jest": "^29.7.0"
+  },
+  "devDependencies": {
+    "prettier": "3.5.3"
+  }
+}
