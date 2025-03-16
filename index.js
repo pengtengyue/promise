@@ -49,35 +49,35 @@ class _Promise {
   }
 
   then(onFulfilled, onRejected) {
-    // 由于executor可能是一个异步函数，所以不能直接执行
-    // 需要做状态判断
-    // 如果执行then的时候，Promise实例状态已经发生改变了，则直接执行传入的函数
-    if (
-      this.status === STATUS_FULFILLED &&
-      onFulfilled &&
-      typeof onFulfilled === 'function'
-    ) {
-      onFulfilled(this.value);
-    }
-
-    if (
-      this.status === STATUS_REJECTED &&
-      onRejected &&
-      typeof onRejected === 'function'
-    ) {
-      onRejected(this.reason);
-    }
-
-    // 如果在执行then的时候，状态还是pending
-    // 那么就加入队列，等待执行resolve、reject的时候，统一执行所有队列
-    if (this.status === STATUS_PENDING) {
-      if (onFulfilled) {
-        this.resolveQueue.push(onFulfilled);
+    // 想要实现链式调用，就需要返回一个新的Promise对象
+    return new _Promise((resolve, reject) => {
+      if (this.status === STATUS_FULFILLED && onFulfilled) {
+        // 将onFulfilled返回的值作为下一个Promise resolve的值
+        const value = onFulfilled(this.value);
+        resolve(value);
       }
-      if (onRejected) {
-        this.rejectQueue.push(onRejected);
+      if (this.status === STATUS_REJECTED && onRejected) {
+        // 将onRejected返回的值作为下一个Promise reject的值
+        const reason = onRejected(this.reason);
+        reject(reason);
       }
-    }
+
+      if (this.status === STATUS_PENDING) {
+        // 这里队列实在构造函数中处理的，所以需要转化一下
+        if (onFulfilled) {
+          this.resolveQueue.push(params => {
+            const value = onFulfilled(params);
+            resolve(value);
+          });
+        }
+        if (onRejected) {
+          this.rejectQueue.push(params => {
+            const value = onRejected(params);
+            reject(value);
+          });
+        }
+      }
+    });
   }
 }
 module.exports = _Promise;

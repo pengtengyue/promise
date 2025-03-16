@@ -72,4 +72,28 @@ describe('_Promise', () => {
       expect(err).toEqual(new Error('error'));
     });
   });
+
+  test('链式调用', () => {
+    new _Promise(resolve => {
+      resolve('success1');
+    })
+      .then(res => {
+        expect(res).toBe('success1');
+        return 'success2';
+      })
+      .then(res => {
+        expect(res).toBe('success2');
+      });
+
+    new _Promise((_resolve, reject) => {
+      reject('error1');
+    })
+      .then(null, err => {
+        expect(err).toBe('error1');
+        return 'error2';
+      })
+      .then(null, err => {
+        expect(err).toBe('error2');
+      });
+  });
 });
