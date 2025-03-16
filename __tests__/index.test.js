@@ -96,4 +96,30 @@ describe('_Promise', () => {
         expect(err).toBe('error2');
       });
   });
+
+  /** 
+
+  // TODO 研究下为啥这条测试用例为啥不做处理也能通过
+
+  test('在链式调用的过程中出现任何错误， 将由下面的then第二个参数处理', () => {
+    new _Promise(resolve => {
+      resolve('success1');
+    })
+      .then(res => {
+        expect(res).toBe('success1');
+        throw new Error('error1');
+        // return new _Promise((resolve, reject) => {
+        //   reject('error1');
+        // });
+      })
+      .then(null, err => {
+        console.log('执行进来了'， err)
+        // 好奇怪，err哪怕不对这里也会通过
+        // expect('error2').toBe('error1');  这样写也通过
+        expect(err).toBe('error1');
+        throw new Error('error2');
+      });
+  });
+
+  */
 });
