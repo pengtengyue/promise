@@ -2,6 +2,14 @@ const STATUS_PENDING = 'pending';
 const STATUS_FULFILLED = 'fulfilled';
 const STATUS_REJECTED = 'rejected';
 
+function executeFnWithCatchError(fn, params, resolve, reject) {
+  try {
+    const result = fn(params);
+    resolve(result);
+  } catch (error) {
+    reject(error);
+  }
+}
 class _Promise {
   constructor(executor = () => {}) {
     // 立即执行构造函数，并且将状态变为pending
@@ -53,27 +61,23 @@ class _Promise {
     return new _Promise((resolve, reject) => {
       if (this.status === STATUS_FULFILLED && onFulfilled) {
         // 将onFulfilled返回的值作为下一个Promise resolve的值
-        const value = onFulfilled(this.value);
-        resolve(value);
+        executeFnWithCatchError(onFulfilled, this.value, resolve, reject);
       }
       if (this.status === STATUS_REJECTED && onRejected) {
         // 将onRejected返回的值作为下一个Promise reject的值
-        const reason = onRejected(this.reason);
-        reject(reason);
+        executeFnWithCatchError(onRejected, this.value, resolve, reject);
       }
 
       if (this.status === STATUS_PENDING) {
         // 这里队列实在构造函数中处理的，所以需要转化一下
         if (onFulfilled) {
           this.resolveQueue.push(params => {
-            const value = onFulfilled(params);
-            resolve(value);
+            executeFnWithCatchError(onFulfilled, params, resolve, reject);
           });
         }
         if (onRejected) {
           this.rejectQueue.push(params => {
-            const value = onRejected(params);
-            reject(value);
+            executeFnWithCatchError(onRejected, params, resolve, reject);
           });
         }
       }
