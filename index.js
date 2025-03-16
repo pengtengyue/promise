@@ -40,8 +40,12 @@ class _Promise {
       }
     };
 
-    // 传入的两个回调会有两个参数 resolve和reject
-    executor(resolve, reject);
+    try {
+      // 传入的两个回调会有两个参数 resolve和reject
+      executor(resolve, reject);
+    } catch (error) {
+      reject(error);
+    }
   }
 
   then(onFulfilled, onRejected) {

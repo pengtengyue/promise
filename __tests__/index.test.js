@@ -63,4 +63,13 @@ describe('_Promise', () => {
       expect(err).toBe('error');
     });
   });
+
+  test('如果构造函数抛出了一个错误，then的第二个参数也可以捕获这个错误', () => {
+    new _Promise(() => {
+      throw new Error('error');
+    }).then(null, err => {
+      // expect(err.message).toBe('error');
+      expect(err).toEqual(new Error('error'));
+    });
+  });
 });
