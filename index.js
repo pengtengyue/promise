@@ -97,5 +97,36 @@ class _Promise {
     // 如果promise被拒绝(rejected)，则会调用传入的onRejected函数，如果promise成功，则直接返回成功的值不做处理
     this.then(null, onRejected);
   }
+
+  static resolve(data) {
+    return new _Promise(resolve => {
+      resolve(data);
+    });
+  }
+
+  static reject(reason) {
+    return new _Promise((resolve, reject) => {
+      reject(reason);
+    });
+  }
+
+  static all(promiseQueue) {
+    return new _Promise((resolve, reject) => {
+      const result = [];
+      // 对队列进行便利
+      promiseQueue.forEach(promise => {
+        promise
+          .then(res => {
+            result.push(res);
+          })
+          .catch(err => {
+            // 任何一个reject 那么就直接reject
+            reject(err);
+          });
+      });
+      // 所有的resolve后，才resolve
+      resolve(result);
+    });
+  }
 }
 module.exports = _Promise;

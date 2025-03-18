@@ -152,4 +152,58 @@ describe('_Promise', () => {
         expect(err.message).toBe('error1');
       });
   });
+
+  test('无论Promise状态是成功还是失败， finally都应该执行', () => {
+    let finallyTimer = 0;
+    new _Promise(resolve => {
+      resolve('success');
+    }).finally(() => {
+      finallyTimer++;
+    });
+    expect(finallyTimer).toBe(1);
+    new _Promise((resolve, reject) => {
+      reject('error');
+    }).finally(() => {
+      finallyTimer++;
+    });
+    expect(finallyTimer).toBe(2);
+  });
+
+  test('resolve可以将一个传入的值作为resolve的参数', () => {
+    const data = { name: 'xx' };
+    _Promise.resolve(data).then(res => {
+      expect(res).toBe(data);
+    });
+  });
+
+  test('reject可以将一个传入的值作为reject的参数', () => {
+    const data = { name: 'xx' };
+    _Promise.reject(data).then(null, err => {
+      expect(err).toBe(data);
+    });
+  });
+
+  test('all方法接受队列， 所有fulfilled才会fulfilled, 只要有一个rejected则rejected', () => {
+    function genPromise(index) {
+      return new _Promise(resolve => {
+        resolve('success' + index);
+      });
+    }
+
+    const promiseQueue = [genPromise(1), genPromise(2), genPromise(3)];
+    _Promise.all(promiseQueue).then(res => {
+      expect(res).toEqual(['success1', 'success2', 'success3']);
+    });
+    const promiseQueue2 = [
+      genPromise(1),
+      genPromise(2),
+      genPromise(3),
+      new _Promise((resolve, reject) => {
+        reject('error');
+      }),
+    ];
+    _Promise.all(promiseQueue2).then(null, err => {
+      expect(err).toBe('error');
+    });
+  });
 });
