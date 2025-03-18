@@ -122,4 +122,34 @@ describe('_Promise', () => {
   });
 
   */
+
+  test('catch应该捕获上一个Promise实例的reject', () => {
+    new _Promise((_resolve, reject) => {
+      reject('error1');
+    }).catch(err => {
+      expect(err).toBe('error1');
+    });
+
+    new _Promise((resolve, _reject) => {
+      resolve('success');
+    })
+      .then(null, err => {
+        throw new Error('error');
+      })
+      .catch(err => {
+        expect(err).toEqual(new Error('error'));
+      });
+  });
+
+  test('catch 可以捕获最开始的reject', () => {
+    new _Promise((_resolve, reject) => {
+      reject('error1');
+    })
+      .then(res => {
+        return res;
+      })
+      .catch(err => {
+        expect(err.message).toBe('error1');
+      });
+  });
 });

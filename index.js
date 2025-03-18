@@ -57,15 +57,22 @@ class _Promise {
   }
 
   then(onFulfilled, onRejected) {
+    onFulfilled = onFulfilled ? onFulfilled : value => value;
+    onRejected = onRejected
+      ? onRejected
+      : reason => {
+          throw new Error(reason);
+        };
+
     // 想要实现链式调用，就需要返回一个新的Promise对象
     return new _Promise((resolve, reject) => {
-      if (this.status === STATUS_FULFILLED && onFulfilled) {
+      if (this.status === STATUS_FULFILLED) {
         // 将onFulfilled返回的值作为下一个Promise resolve的值
         executeFnWithCatchError(onFulfilled, this.value, resolve, reject);
       }
-      if (this.status === STATUS_REJECTED && onRejected) {
+      if (this.status === STATUS_REJECTED) {
         // 将onRejected返回的值作为下一个Promise reject的值
-        executeFnWithCatchError(onRejected, this.value, resolve, reject);
+        executeFnWithCatchError(onRejected, this.reason, resolve, reject);
       }
 
       if (this.status === STATUS_PENDING) {
@@ -82,6 +89,13 @@ class _Promise {
         }
       }
     });
+  }
+
+  catch(onRejected) {
+    // 直接复用then方法的逻辑即可，将闯入的数据作为then的第二个参数
+    // 当你调用promise.catch(onRejected)的时候，其实就是在Promise上调用then，只是不传入成功回调，只传入失败回调
+    // 如果promise被拒绝(rejected)，则会调用传入的onRejected函数，如果promise成功，则直接返回成功的值不做处理
+    this.then(null, onRejected);
   }
 }
 module.exports = _Promise;

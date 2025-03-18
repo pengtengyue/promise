@@ -1,5 +1,3 @@
-# promise
-
 学习 JavaScript Promise 的核心特性与实现机制，手写符合 Promises/A+ 规范的 Promise 实现
 
 ```
@@ -14,7 +12,7 @@ jest --coverage
 需要全局安装过jest（npm install --global jest）
 ```
 
-### Promise介绍
+# Promise介绍
 
 #### 什么是一个Promise？
 
@@ -36,3 +34,90 @@ jest --coverage
     通过then方法可以对Promise中的resolve进行处理，then方法的返回值是一个Promise实例
   - 多次调用then方法
     同一个Promise实例可以调用多个then方法，当Promise中resolve被回调时，所有then方法传入的回调函数都会被执行
+
+```
+const promise = new Promise(resolve => {
+  resolve('Hello')
+})
+promise.then(res => console.log(res))
+promise.then(res => console.log(res))
+promise.then(res => console.log(res))
+
+// log日志如下：
+// Hello
+// Hello
+// Hello
+```
+
+  - then方法传入的回调函数可以有返回值
+  如果返回的是普通值，那么这个普通值作为一个新的Promise的resolve值
+
+```
+const promise = new Promise(resolve => {
+  resolve('Hello');
+});
+
+promise
+  .then(() => {
+    return 'then';
+  })
+  .then(res => console.log(res));
+
+// 上下promise逻辑等价（关注第一个then回调里的return）
+
+promise
+  .then(() => {
+    return new Promise(resolve => resolve('then'));
+  })
+  .then(res => console.log(res));
+
+// log日志如下：
+// then
+// then
+```
+   如果返回的是Promise，那么就可以再次调用then方法
+   如果返回的是一个对象，并且实现了thenable，该then函数由两个参数resolve和reject，则resolve会传递给下一个Promise
+```
+const promise = new Promise(resolve => {
+  resolve('Hello');
+});
+
+promise
+  .then(() => {
+    return {
+      name: 'test-v1'
+    };
+  })
+  .then(res => console.log(res));
+// { name: 'test-v1' }
+
+promise
+  .then(() => {
+    return {
+      name: 'test-v1',
+      then: (resolve) => {
+        return resolve('test-v2')
+      }
+    };
+  })
+  .then(res => console.log(res));
+// test-v2
+// 此时输入的是test-v2，是返回对象的then方法里resolve传递的值
+```
+  - catch方法
+  除了then方法的第二个参数来捕获reject错误外，我们还可以通过catch方法，catch返回一个Promise
+  catch方法也是可以多次调用的，只要Promise实例的状态是rejected，那么就会调用catch方法
+```
+const promise = new Promise((_resolve, reject) => {
+  reject('error');
+});
+
+promise
+  .then(
+    null,
+  )
+  .catch(err => console.log(err));
+// error
+```
+
+
